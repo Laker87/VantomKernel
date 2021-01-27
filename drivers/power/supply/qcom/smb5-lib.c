@@ -4070,6 +4070,7 @@ int smblib_set_prop_pd_current_max(struct smb_charger *chg,
 	return rc;
 }
 
+#define SUSPEND_CURRENT_UA  2000
 static int smblib_handle_usb_current(struct smb_charger *chg,
 					int usb_current)
 {
@@ -4133,12 +4134,15 @@ static int smblib_handle_usb_current(struct smb_charger *chg,
 		if (!rc && !val.intval)
 			return 0;
 
-		/* if flash is active force 500mA */
-		if ((usb_current < SDP_CURRENT_UA) && is_flash_active(chg))
-			usb_current = SDP_CURRENT_UA;
+		if ((chg->real_charger_type == POWER_SUPPLY_TYPE_USB
+			|| chg->real_charger_type == POWER_SUPPLY_TYPE_USB_CDP) &&
+			usb_current == SUSPEND_CURRENT_UA)
+			rc = vote(chg->usb_icl_votable, USB_PSY_VOTER,
+						true, USBIN_500MA);
+		else
+			rc = vote(chg->usb_icl_votable, USB_PSY_VOTER,
+						true, usb_current);
 
-		rc = vote(chg->usb_icl_votable, USB_PSY_VOTER, true,
-							usb_current);
 		if (rc < 0) {
 			pr_err("Couldn't vote ICL USB_PSY_VOTER rc=%d\n", rc);
 			return rc;
