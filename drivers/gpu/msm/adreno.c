@@ -1145,17 +1145,17 @@ static int adreno_of_get_power(struct adreno_device *adreno_dev,
 	/* get pm-qos-active-latency, set it to default if not found */
 	if (of_property_read_u32(node, "qcom,pm-qos-active-latency",
 		&device->pwrctrl.pm_qos_active_latency))
-		device->pwrctrl.pm_qos_active_latency = 1000;
+		device->pwrctrl.pm_qos_active_latency = 501;
 
 	/* get pm-qos-cpu-mask-latency, set it to default if not found */
 	if (of_property_read_u32(node, "qcom,l2pc-cpu-mask-latency",
 		&device->pwrctrl.pm_qos_cpu_mask_latency))
-		device->pwrctrl.pm_qos_cpu_mask_latency = 1000;
+		device->pwrctrl.pm_qos_cpu_mask_latency = 501;
 
 	/* get pm-qos-wakeup-latency, set it to default if not found */
 	if (of_property_read_u32(node, "qcom,pm-qos-wakeup-latency",
 		&device->pwrctrl.pm_qos_wakeup_latency))
-		device->pwrctrl.pm_qos_wakeup_latency = 100;
+		device->pwrctrl.pm_qos_wakeup_latency = 101;
 
 	if (of_property_read_u32(node, "qcom,idle-timeout", &timeout))
 		timeout = 64;
@@ -4185,19 +4185,6 @@ static int adreno_resume_device(struct kgsl_device *device,
 		adreno_dispatcher_unhalt(device);
 
 	return 0;
-}
-
-u32 adreno_get_ucode_version(const u32 *data)
-{
-	u32 version;
-
-	version = data[1];
-
-	if ((version & 0xf) != 0xa)
-		return version;
-
-	version &= ~0xfff;
-	return  version | ((data[3] & 0xfff000) >> 12);
 }
 
 static const struct kgsl_functable adreno_functable = {
